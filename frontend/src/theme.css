@@ -96,8 +96,7 @@ input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,
 .sec-title{display:flex;align-items:center;gap:16px;margin:56px 0 24px}
 .sec-title h2{font-size:1.7rem;color:var(--gold-soft);white-space:nowrap}
 .sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line-2),transparent)}
-.reveal{opacity:0;transform:translateY(24px);transition:.7s cubic-bezier(.2,.7,.2,1)}
-.reveal.in{opacity:1;transform:none}
+.reveal{opacity:1;transform:none}
 
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
 .summary .row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
@@ -183,3 +182,11 @@ footer .om{color:var(--gold);font-size:1.5rem;display:block;margin-bottom:8px}
   border:1px solid var(--line-2);border-radius:16px;padding:30px 32px}
 .purpose-card .ic{font-size:1.6rem;display:block;margin-bottom:10px}
 .purpose-card p{font-size:1.12rem;line-height:1.75}
+
+
+.tl-toggle{margin-top:8px;background:none;border:1px solid var(--line);color:var(--gold-soft);border-radius:100px;padding:5px 15px;cursor:pointer;font-family:'Marcellus';font-size:.76rem;transition:.2s}
+  .tl-toggle:hover{border-color:var(--gold);background:rgba(217,180,81,.06)}
+  .tl-aspects{margin-top:14px;display:grid;gap:10px;border-left:2px solid var(--line-2);padding-left:16px}
+  .tl-aspect{display:flex;flex-direction:column;gap:2px}
+  .tl-aspect-label{font-family:'Marcellus';font-size:.78rem;letter-spacing:.05em;color:var(--saffron)}
+  .tl-aspect-text{color:var(--ink-dim);font-size:.95rem}
