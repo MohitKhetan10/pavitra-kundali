@@ -1,0 +1,10 @@
+# One-click backend deploy on Render (free tier). Dashboard: New + → Blueprint → pick this repo.
+services:
+  - type: web
+    name: pavitra-kundali-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
