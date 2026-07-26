@@ -21,11 +21,7 @@ export default function App(){
   const resultsRef=useRef()
   const t=T[lang]
 
-  useEffect(()=>{
-    const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('in')),{threshold:.1})
-    document.querySelectorAll('.reveal').forEach(el=>io.observe(el))
-    return()=>io.disconnect()
-  },[chart,lang])
+
 
 
 
