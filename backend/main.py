@@ -69,3 +69,15 @@ async def geocode(q: str = Query(..., min_length=2)):
 
 @app.post("/api/chart")
 def chart(req: ChartRequest):
+    try:
+        tz = req.tz
+        if tz is None:
+            _, tz = offset_for(req.lat, req.lon, req.dob, req.tob)
+        data = compute_chart(req.dob, req.tob, req.lat, req.lon, tz)
+        data["resolved_tz"] = tz
+        data["readings"] = build_readings(data)
+        data["timeline"] = build_timeline(data)
+        data["yogas_i18n"] = build_yogas(data)
+        return data
+    except Exception as e:
+        raise HTTPException(400, f"Calculation error: {e}")
