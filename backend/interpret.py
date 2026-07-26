@@ -56,7 +56,6 @@ DIGNITY_PHRASE = {
        "Enemy sign":"शत्रु राशि में होकर अधिक परिश्रम माँगता है","Debilitated":"नीच का होने से फल परिश्रम व सीख के साथ आता है","-":"जिस भाव में है उसके अनुसार फल देता है"},
 }
 
-# short section framing words
 UI = {
  "en":{"asc":"Ascendant","moon":"Moon","in_house":"in the","house":"house","reads":"Reading",
        "no_manglik":"No Maṅgal dosha — Mars is not in a dosha house.",
@@ -75,7 +74,6 @@ UI = {
        "health_note":"यह प्रवृत्तियों का पारंपरिक ज्योतिषीय दृष्टिकोण है, चिकित्सकीय सलाह नहीं।"},
 }
 
-# which houses/planets each life-section keys on
 SECTION_HOUSES = {"career":[10,2,11,6],"relationships":[7,5,4],"health":[1,6,8],"personality":[1]}
 REMEDY = {
  "en":{"Sun":"Offer water to the Sun at dawn; honour Surya.","Moon":"Respect the mother; observe Monday fasts; wear white.",
@@ -93,12 +91,10 @@ REMEDY = {
 }
 
 
-# Devanagari localisation for sign & planet names (ne/hi share script)
 SIGN_DEVA={"Mesha":"मेष","Vrishabha":"वृष","Mithuna":"मिथुन","Karka":"कर्क","Simha":"सिंह","Kanya":"कन्या",
  "Tula":"तुला","Vrischika":"वृश्चिक","Dhanu":"धनु","Makara":"मकर","Kumbha":"कुम्भ","Meena":"मीन"}
 PLANET_DEVA={"Sun":"सूर्य","Moon":"चन्द्र","Mars":"मंगल","Mercury":"बुध","Jupiter":"गुरु","Venus":"शुक्र",
  "Saturn":"शनि","Rahu":"राहु","Ketu":"केतु"}
-NAK_DEVA={}  # names kept in transliteration; optional future work
 def _localize(text):
     for k,v in SIGN_DEVA.items(): text=text.replace(k,v)
     for k,v in PLANET_DEVA.items(): text=text.replace(k,v)
@@ -111,19 +107,16 @@ def planet_line(lang, name, p):
     sig=PLANET_SIG[lang][name]; hs=HOUSE_SIG[lang][p["house"]-1]; dg=DIGNITY_PHRASE[lang][p["dignity"]]
     if lang=="en":
         return f"{name} ({sig}) {dg}, active in the {_ordinal(p['house'])} house of {hs}."
-    conn={"ne":"—","hi":"—"}[lang]
     hn=p["house"]
     return f"{name} ({sig}) {dg}; {hn} {UI[lang]['house']} ({hs}) मा सक्रिय।" if lang=="ne" \
            else f"{name} ({sig}) {dg}; {hn} {UI[lang]['house']} ({hs}) में सक्रिय।"
 
 def build_readings(chart):
-    """Return {lang: {section: text}} for all six sections."""
     out={}
     for lang in LANGS:
         P=chart["planets"]; asc=chart["ascendant"]
         lagna_sign=asc["rashi_num"]-1; moon_sign=P["Moon"]["rashi_num"]-1
         t=SIGN_TRAITS[lang]; ui=UI[lang]
-        # PERSONALITY
         if lang=="en":
             personality=(f"With {asc['rashi']} rising, your core nature is {t[lagna_sign]}. "
                 f"The Moon in {P['Moon']['rashi']} makes your emotional world {t[moon_sign]}, "
@@ -144,7 +137,6 @@ def build_readings(chart):
         career=section_for(["Sun","Saturn","Mercury","Jupiter"])
         relationships=section_for(["Venus","Mars"]) + " " + (ui["manglik"] if chart["mangal_dosha"]["present"] else ui["no_manglik"])
         health=section_for(["Mars","Saturn"]) + " " + ui["health_note"]
-        # STRENGTHS / CHALLENGES from dignity
         strong=[n for n in P if P[n]["dignity"] in ("Exalted","Own sign")]
         weak=[n for n in P if P[n]["dignity"]=="Debilitated"]
         if lang=="en":
@@ -159,7 +151,6 @@ def build_readings(chart):
             sc=(("शक्ति: "+", ".join(strong)+" उत्तम स्थिति में हैं। " if strong else "")
                 +("सुधार क्षेत्र: "+", ".join(weak)+" सचेत प्रयास माँगते हैं। " if weak else "")
                 +("योग: "+", ".join(y["name"] for y in chart["yogas"])+"।" if chart["yogas"] else ""))
-        # REMEDIES for weak/afflicted planets (fallback: lagna lord + Saturn)
         focus=weak or [chart["lagna_lord"],"Saturn"]
         remedies=" ".join(REMEDY[lang][n] for n in dict.fromkeys(focus) if n in REMEDY[lang])
         sec={"personality":personality,"career":career,"relationships":relationships,
@@ -168,11 +159,6 @@ def build_readings(chart):
         if lang in ("ne","hi"): sec={k:_localize(v) for k,v in sec.items()}
         out[lang]=sec
     return out
-
-
-def _ord3(lang,n):
-    if lang=="en": return _ordinal(n)
-    return str(n)
 
 
 YOGA_TR={
@@ -204,7 +190,6 @@ def build_yogas(chart):
         else: key=None
         for lang in LANGS:
             if key=="Pancha":
-                # keep specific name (Ruchaka etc.), localised desc
                 nm_l=nm.split(" Yoga")[0]+(" योग" if lang!="en" else " Yoga")
                 out[lang].append({"name":nm_l if lang!="en" else nm,"desc":YOGA_TR["Pancha"]["desc"][lang],"good":y["good"]})
             elif key:
@@ -241,38 +226,73 @@ def build_purpose(lang, chart):
     if lang in ("ne","hi"): txt=_localize(txt)
     return txt
 
+
+PLANET_AREA={
+ "en":{
+  "Sun":{"career":"leadership, authority and public recognition","wealth":"status-linked income and government/official sources","relationships":"matters of ego, pride and the father","health":"heart, spine, eyes and overall vitality","mind":"confidence, willpower and sense of self"},
+  "Moon":{"career":"public-facing work, care roles and changeable paths","wealth":"fluctuating cash-flow tied to moods and the public","relationships":"emotional bonding, the mother and home life","health":"mind, chest, fluids and sleep","mind":"emotions, intuition and inner peace"},
+  "Mars":{"career":"drive, competition, engineering, sports or defence","wealth":"gains through effort, property and bold action","relationships":"passion, friction and the need for patience","health":"blood, muscles, accidents and inflammation","mind":"courage, anger and decisiveness"},
+  "Mercury":{"career":"communication, business, writing, trade and analysis","wealth":"income through skill, commerce and networks","relationships":"friendship, wit and clear communication","health":"nerves, skin, speech and digestion","mind":"intellect, adaptability and learning"},
+  "Jupiter":{"career":"teaching, advising, law, finance and expansion","wealth":"growth, savings and fortunate opportunities","relationships":"marriage, children, mentors and trust","health":"liver, weight and metabolism","mind":"wisdom, optimism and ethics"},
+  "Venus":{"career":"art, design, media, luxury and relationships work","wealth":"comfort, vehicles and pleasant sources of income","relationships":"love, marriage, romance and harmony","health":"reproductive system, kidneys and throat","mind":"desire, aesthetics and contentment"},
+  "Saturn":{"career":"slow, steady rise through discipline and long labour","wealth":"delayed but lasting gains through persistence","relationships":"commitment, duty and testing of bonds","health":"bones, joints, teeth and chronic issues","mind":"patience, discipline and endurance"},
+  "Rahu":{"career":"unconventional fields, foreign links and sudden rises","wealth":"speculative, foreign or unexpected gains and risks","relationships":"unusual, intense or unconventional ties","health":"mysterious, hard-to-diagnose or nervous issues","mind":"ambition, obsession and restlessness"},
+  "Ketu":{"career":"research, spirituality, healing and behind-the-scenes work","wealth":"detachment from money; gains then loss of interest","relationships":"karmic bonds, separations and inner distance","health":"subtle, immune and psychosomatic matters","mind":"detachment, insight and spiritual seeking"}},
+}
+PLANET_AREA["ne"]={
+ "Sun":{"career":"नेतृत्व, अधिकार र सार्वजनिक प्रतिष्ठा","wealth":"पद-सम्बद्ध आय र सरकारी स्रोत","relationships":"अहं, स्वाभिमान र पिता","health":"मुटु, मेरुदण्ड, आँखा र ओज","mind":"आत्मविश्वास र इच्छाशक्ति"},
+ "Moon":{"career":"जनसम्पर्क, हेरचाह र परिवर्तनशील मार्ग","wealth":"मनोदशासँग जोडिएको अस्थिर नगद-प्रवाह","relationships":"भावनात्मक बन्धन, माता र घर","health":"मन, छाती र निद्रा","mind":"भावना, अन्तर्ज्ञान र शान्ति"},
+ "Mars":{"career":"ऊर्जा, प्रतिस्पर्धा, इन्जिनियरिङ वा सुरक्षा","wealth":"परिश्रम, जग्गा र साहसिक कार्यबाट लाभ","relationships":"आवेग, टकराव र धैर्यको आवश्यकता","health":"रगत, मांसपेशी र चोटपटक","mind":"साहस, रिस र निर्णयक्षमता"},
+ "Mercury":{"career":"सञ्चार, व्यापार, लेखन र विश्लेषण","wealth":"सीप, वाणिज्य र सञ्जालबाट आय","relationships":"मित्रता र स्पष्ट सञ्चार","health":"स्नायु, छाला र पाचन","mind":"बुद्धि, अनुकूलनशीलता र सिकाइ"},
+ "Jupiter":{"career":"शिक्षण, सल्लाह, कानून र वित्त","wealth":"वृद्धि, बचत र भाग्यशाली अवसर","relationships":"विवाह, सन्तान र गुरु","health":"कलेजो, तौल र चयापचय","mind":"ज्ञान, आशावाद र नैतिकता"},
+ "Venus":{"career":"कला, डिजाइन, मिडिया र विलासिता","wealth":"सुविधा, सवारी र सुखद आय-स्रोत","relationships":"प्रेम, विवाह र सामंजस्य","health":"प्रजनन प्रणाली, मृगौला र घाँटी","mind":"इच्छा, सौन्दर्यबोध र सन्तुष्टि"},
+ "Saturn":{"career":"अनुशासन र दीर्घ परिश्रमबाट क्रमिक उन्नति","wealth":"ढिलो तर दिगो लाभ","relationships":"प्रतिबद्धता, कर्तव्य र बन्धनको परीक्षा","health":"हाड, जोर्नी, दाँत र दीर्घ रोग","mind":"धैर्य, अनुशासन र सहनशीलता"},
+ "Rahu":{"career":"अपरम्परागत क्षेत्र, विदेशी सम्बन्ध र अकस्मात् उन्नति","wealth":"सट्टा, विदेशी वा अप्रत्याशित लाभ र जोखिम","relationships":"असामान्य, गहन वा अपरम्परागत सम्बन्ध","health":"रहस्यमय वा स्नायुजन्य समस्या","mind":"महत्त्वाकांक्षा, आसक्ति र बेचैनी"},
+ "Ketu":{"career":"अनुसन्धान, अध्यात्म, उपचार र पर्दा पछाडिको काम","wealth":"धनप्रति वैराग्य; लाभपछि रुचि हराउने","relationships":"कार्मिक बन्धन, वियोग र आन्तरिक दूरी","health":"सूक्ष्म, प्रतिरक्षा र मनोदैहिक कुरा","mind":"वैराग्य, अन्तर्दृष्टि र आध्यात्मिक खोज"}}
+PLANET_AREA["hi"]={
+ "Sun":{"career":"नेतृत्व, अधिकार व सार्वजनिक प्रतिष्ठा","wealth":"पद-संबद्ध आय व सरकारी स्रोत","relationships":"अहं, स्वाभिमान व पिता","health":"हृदय, रीढ़, नेत्र व ओज","mind":"आत्मविश्वास व इच्छाशक्ति"},
+ "Moon":{"career":"जनसंपर्क, देखभाल व परिवर्तनशील मार्ग","wealth":"मनोदशा से जुड़ा अस्थिर नकदी-प्रवाह","relationships":"भावनात्मक बंधन, माता व घर","health":"मन, वक्ष व निद्रा","mind":"भावना, अंतर्ज्ञान व शांति"},
+ "Mars":{"career":"ऊर्जा, प्रतिस्पर्धा, इंजीनियरिंग या सुरक्षा","wealth":"परिश्रम, भूमि व साहसिक कार्य से लाभ","relationships":"आवेग, टकराव व धैर्य की आवश्यकता","health":"रक्त, मांसपेशी व चोट","mind":"साहस, क्रोध व निर्णयक्षमता"},
+ "Mercury":{"career":"संचार, व्यापार, लेखन व विश्लेषण","wealth":"कौशल, वाणिज्य व नेटवर्क से आय","relationships":"मित्रता व स्पष्ट संचार","health":"स्नायु, त्वचा व पाचन","mind":"बुद्धि, अनुकूलनशीलता व सीख"},
+ "Jupiter":{"career":"शिक्षण, सलाह, विधि व वित्त","wealth":"वृद्धि, बचत व भाग्यशाली अवसर","relationships":"विवाह, संतान व गुरु","health":"यकृत, वजन व चयापचय","mind":"ज्ञान, आशावाद व नैतिकता"},
+ "Venus":{"career":"कला, डिज़ाइन, मीडिया व विलासिता","wealth":"सुविधा, वाहन व सुखद आय-स्रोत","relationships":"प्रेम, विवाह व सामंजस्य","health":"प्रजनन तंत्र, गुर्दे व गला","mind":"इच्छा, सौंदर्यबोध व संतोष"},
+ "Saturn":{"career":"अनुशासन व दीर्घ परिश्रम से क्रमिक उन्नति","wealth":"विलंबित पर स्थायी लाभ","relationships":"प्रतिबद्धता, कर्तव्य व बंधनों की परीक्षा","health":"अस्थि, जोड़, दाँत व दीर्घ रोग","mind":"धैर्य, अनुशासन व सहनशीलता"},
+ "Rahu":{"career":"अपरंपरागत क्षेत्र, विदेशी संबंध व आकस्मिक उन्नति","wealth":"सट्टा, विदेशी या अप्रत्याशित लाभ व जोखिम","relationships":"असामान्य, गहन या अपरंपरागत संबंध","health":"रहस्यमय या स्नायुजन्य समस्याएँ","mind":"महत्वाकांक्षा, आसक्ति व बेचैनी"},
+ "Ketu":{"career":"अनुसंधान, अध्यात्म, उपचार व पर्दे के पीछे का कार्य","wealth":"धन से वैराग्य; लाभ के बाद रुचि का ह्रास","relationships":"कार्मिक बंधन, वियोग व आंतरिक दूरी","health":"सूक्ष्म, प्रतिरक्षा व मनोदैहिक विषय","mind":"वैराग्य, अंतर्दृष्टि व आध्यात्मिक खोज"}}
+
+VALENCE={
+ "en":{"strong":"strongly supported and favourable","weak":"tested — progress needs conscious effort","mixed":"steady but mixed; results come gradually"},
+ "ne":{"strong":"बलियो र अनुकूल","weak":"परीक्षणपूर्ण — प्रगतिका लागि सचेत प्रयास चाहिन्छ","mixed":"स्थिर तर मिश्रित; फल क्रमशः आउँछ"},
+ "hi":{"strong":"बलवान व अनुकूल","weak":"परीक्षणपूर्ण — प्रगति हेतु सचेत प्रयास आवश्यक","mixed":"स्थिर पर मिश्रित; फल क्रमशः आते हैं"}}
+
+def _valence(dig):
+    if dig in ("Exalted","Own sign"): return "strong"
+    if dig in ("Debilitated","Enemy sign"): return "weak"
+    return "mixed"
+
 def build_timeline(chart):
-    """Major life-prediction chapters, one per mahadasha, trilingual."""
     P=chart["planets"]; out={l:[] for l in LANGS}
     for m in chart["dasha"]["sequence"]:
-        lord=m["lord"]
-        if lord in ("Rahu","Ketu"):
-            hp=P[lord]; hsig_i=hp["house"]-1
-        else:
-            hp=P[lord]; hsig_i=hp["house"]-1
-        dig=hp.get("dignity","-")
+        lord=m["lord"]; hp=P[lord]; dig=hp.get("dignity","-"); val=_valence(dig)
         for lang in LANGS:
-            sig=PLANET_SIG[lang][lord]; hs=HOUSE_SIG[lang][hsig_i]; dgp=DIGNITY_PHRASE[lang][dig]
+            sig=PLANET_SIG[lang][lord]; hs=HOUSE_SIG[lang][hp["house"]-1]; dgp=DIGNITY_PHRASE[lang][dig]
+            va=VALENCE[lang][val]
             if lang=="en":
-                text=(f"A chapter shaped by {sig}. With {lord} placed in the {_ordinal(hp['house'])} house of {hs} and {dgp}, "
-                      f"life focuses on {hs}; results are {'strong and supportive' if dig in ('Exalted','Own sign') else 'testing but growth-giving' if dig in ('Debilitated','Enemy sign') else 'mixed and gradual'}.")
+                summary=(f"A life-chapter shaped by {sig}. {lord} sits in the {_ordinal(hp['house'])} house of {hs} and {dgp}, "
+                         f"so this period centres on {hs}.")
             elif lang=="ne":
-                text=(f"{sig} ले आकार दिने कालखण्ड। {lord} {hp['house']} भाव ({hs}) मा रहेर {dgp}, "
-                      f"जीवन {hs} मा केन्द्रित हुन्छ; फल {'बलियो र अनुकूल' if dig in ('Exalted','Own sign') else 'परीक्षण तर विकासकारी' if dig in ('Debilitated','Enemy sign') else 'मिश्रित र क्रमिक'} रहन्छ।")
-                text=_localize(text)
+                summary=_localize(f"{sig} le आकार दिने जीवन-अध्याय। {lord} {hp['house']} भाव ({hs}) मा रहेर {dgp}, "
+                         f"यस अवधि {hs} मा केन्द्रित हुन्छ।")
             else:
-                text=(f"{sig} से आकार पाने वाला कालखंड। {lord} {hp['house']} भाव ({hs}) में स्थित होकर {dgp}, "
-                      f"जीवन {hs} पर केंद्रित रहता है; फल {'बलवान व अनुकूल' if dig in ('Exalted','Own sign') else 'परीक्षणपूर्ण पर विकासकारी' if dig in ('Debilitated','Enemy sign') else 'मिश्रित व क्रमिक'} रहते हैं।")
-                text=_localize(text)
-            out[lang].append({"lord":lord,"start":m["start"],"end":m["end"],"text":text})
+                summary=_localize(f"{sig} से आकार पाने वाला जीवन-अध्याय। {lord} {hp['house']} भाव ({hs}) में स्थित होकर {dgp}, "
+                         f"यह अवधि {hs} पर केंद्रित रहती है।")
+            area=PLANET_AREA[lang][lord]
+            aspects={}
+            for key in ("career","wealth","relationships","health","mind"):
+                kw=area[key]
+                if lang=="en": aspects[key]=f"{kw} — {va}."
+                elif lang=="ne": aspects[key]=_localize(f"{kw} — {va}।")
+                else: aspects[key]=_localize(f"{kw} — {va}।")
+            out[lang].append({"lord":lord,"start":m["start"],"end":m["end"],
+                              "summary":summary,"aspects":aspects})
     return out
-
-if __name__=="__main__":
-    from jyotish import compute_chart
-    c=compute_chart("1997-05-21","14:30",27.7172,85.3240,5.75)
-    r=build_readings(c)
-    for lang in LANGS:
-        print("\n===",lang,"===")
-        print("PERSONALITY:",r[lang]["personality"][:220])
-        print("CAREER:",r[lang]["career"][:180])
-    print("\nRemedies(en):",r["en"]["remedies"][:160])
