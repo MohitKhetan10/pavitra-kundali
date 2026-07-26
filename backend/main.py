@@ -14,18 +14,21 @@ app = FastAPI(title="Pavitra Kundali API", version="2.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"],
                    allow_methods=["*"], allow_headers=["*"])
 
-# lazy timezone finder (heavy import)
 _tf = None
-def _finder():
+def _tz_name(lat, lon):
+    """Resolve IANA timezone from coordinates (lazy import; safe fallback to UTC)."""
     global _tf
-    if _tf is None:
-        from timezonefinder import TimezoneFinder
-        _tf = TimezoneFinder()
-    return _tf
+    try:
+        if _tf is None:
+            from timezonefinder import TimezoneFinder
+            _tf = TimezoneFinder()
+        return _tf.timezone_at(lat=lat, lng=lon) or "UTC"
+    except Exception:
+        return "UTC"
 
 def offset_for(lat, lon, dob, tob):
     """Historical UTC offset (hours) for a birth moment — respects old DST/rule changes."""
-    tzname = _finder().timezone_at(lat=lat, lng=lon) or "UTC"
+    tzname = _tz_name(lat, lon)
     y,mo,d = map(int, dob.split("-")); hh,mm = map(int, tob.split(":"))
     dt = datetime(y,mo,d,hh,mm, tzinfo=ZoneInfo(tzname))
     return tzname, dt.utcoffset().total_seconds()/3600.0
@@ -58,7 +61,7 @@ async def geocode(q: str = Query(..., min_length=2)):
     for row in rows:
         lat, lon = float(row["lat"]), float(row["lon"])
         try:
-            tzname = _finder().timezone_at(lat=lat, lng=lon) or "UTC"
+            tzname = _tz_name(lat, lon)
         except Exception:
             tzname = "UTC"
         out.append({"name": row["display_name"], "lat": lat, "lon": lon, "tz_name": tzname})
@@ -66,15 +69,3 @@ async def geocode(q: str = Query(..., min_length=2)):
 
 @app.post("/api/chart")
 def chart(req: ChartRequest):
-    try:
-        tz = req.tz
-        if tz is None:
-            _, tz = offset_for(req.lat, req.lon, req.dob, req.tob)
-        data = compute_chart(req.dob, req.tob, req.lat, req.lon, tz)
-        data["resolved_tz"] = tz
-        data["readings"] = build_readings(data)
-        data["timeline"] = build_timeline(data)
-        data["yogas_i18n"] = build_yogas(data)
-        return data
-    except Exception as e:
-        raise HTTPException(400, f"Calculation error: {e}")
