@@ -1,4 +1,4 @@
-import React,{useState,useRef,useEffect} from 'react'
+import React,{useState,useRef} from 'react'
 import { getChart } from './api.js'
 import { T, LOADING, PLANET, sign } from './i18n.js'
 import PlaceInput from './components/PlaceInput.jsx'
@@ -20,10 +20,6 @@ export default function App(){
   const[tab,setTab]=useState('north')
   const resultsRef=useRef()
   const t=T[lang]
-
-
-
-
 
   async function submit(){
     setError(''); setLoading(true); setChart(null)
@@ -64,9 +60,9 @@ export default function App(){
     {loading&&<div className="loading"><div className="orbit"/><p>{LOADING[lang]}</p></div>}
 
     {chart&&<>
-      <div className="sec-title reveal"><h2 className="deva">{t.chart}</h2></div>
+      <div className="sec-title"><h2 className="deva">{t.chart}</h2></div>
       <div className="grid-2">
-        <div className="card reveal">
+        <div className="card">
           <div className="tabs">
             <button className={tab==='north'?'on':''} onClick={()=>setTab('north')}>{t.north}</button>
             <button className={tab==='south'?'on':''} onClick={()=>setTab('south')}>{t.south}</button>
@@ -77,7 +73,7 @@ export default function App(){
           {tab==='d9'&&<ChartD9 chart={chart} lang={lang}/>}
           <div className="cap">{tab==='d9'?t.d9cap:t.d1cap}</div>
         </div>
-        <div className="card summary reveal">
+        <div className="card summary">
           <div className="row"><span className="k">{t.asc}</span><span className="v">{sign(lang,chart.ascendant.rashi)} <span className="g">{chart.ascendant.dms}</span></span></div>
           <div className="row"><span className="k">{t.moon}</span><span className="v">{sign(lang,chart.planets.Moon.rashi)}</span></div>
           <div className="row"><span className="k">{t.sun}</span><span className="v">{sign(lang,chart.planets.Sun.rashi)}</span></div>
@@ -88,23 +84,23 @@ export default function App(){
         </div>
       </div>
 
-      <div className="sec-title reveal"><h2 className="deva">{t.purpose}</h2></div>
-      <div className="purpose-card reveal"><span className="ic">🔯</span><p>{chart.readings[lang].purpose}</p></div>
+      <div className="sec-title"><h2 className="deva">{t.purpose}</h2></div>
+      <div className="purpose-card"><span className="ic">🔯</span><p>{chart.readings[lang].purpose}</p></div>
 
-      <div className="sec-title reveal"><h2 className="deva">{t.pos}</h2></div>
-      <div className="card reveal"><PlanetTable planets={chart.planets} lang={lang}/></div>
+      <div className="sec-title"><h2 className="deva">{t.pos}</h2></div>
+      <div className="card"><PlanetTable planets={chart.planets} lang={lang}/></div>
 
-      <div className="reveal"><Analysis chart={chart} lang={lang}/></div>
+      <div><Analysis chart={chart} lang={lang}/></div>
 
-      <div className="sec-title reveal"><h2 className="deva">{t.read}</h2></div>
-      <div className="card reveal"><Readings readings={chart.readings} lang={lang}/></div>
+      <div className="sec-title"><h2 className="deva">{t.read}</h2></div>
+      <div className="card"><Readings readings={chart.readings} lang={lang}/></div>
 
-      <div className="sec-title reveal"><h2 className="deva">{t.timeline}</h2></div>
-      <div className="card reveal"><p style={{color:'var(--ink-dim)',fontStyle:'italic',marginBottom:18}}>{t.tlnote}</p>
+      <div className="sec-title"><h2 className="deva">{t.timeline}</h2></div>
+      <div className="card"><p style={{color:'var(--ink-dim)',fontStyle:'italic',marginBottom:18}}>{t.tlnote}</p>
         <Timeline timeline={chart.timeline} lang={lang}/></div>
 
-      <div className="sec-title reveal"><h2 className="deva">{t.dasha}</h2></div>
-      <div className="card reveal"><DashaTree dasha={chart.dasha} lang={lang}/></div>
+      <div className="sec-title"><h2 className="deva">{t.dasha}</h2></div>
+      <div className="card"><DashaTree dasha={chart.dasha} lang={lang}/></div>
     </>}
 
     <footer><span className="om deva">ॐ</span>
