@@ -12,7 +12,7 @@ body{
   min-height:100vh;overflow-x:hidden;
 }
 /* interactive starfield canvas — locked BEHIND everything, cannot cover content */
-canvas.starfield{position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none}
+canvas.starfield{position:fixed;inset:0;width:100%;height:100vh;z-index:-1;pointer-events:none}
 
 .app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:20px 20px 80px}
 
