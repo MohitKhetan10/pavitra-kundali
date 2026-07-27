@@ -1,24 +1,31 @@
-
 :root{
-
   --night:#0b0a1a; --panel:#171432; --line:rgba(212,175,55,0.25);
-  --gold:#ecd28a; --saffron:#ff9d4d; --ink:#f3eede; --ink-dim:#b7b0cc;
+  --gold:#ecd28a; --saffron:#ff9d4d; --ink:#f3eede; --ink-dim:#b7b0cc; --violet:#7b6cff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:#0b0a1a;color:#f3eede;font-family:Georgia,'Cormorant Garamond',serif;font-size:19px;line-height:1.6}
+body{
+  background:#0b0a1a;
+  background-image:radial-gradient(1100px 700px at 50% 0%, #241b52 0%, #0e0a2a 40%, #0b0a1a 75%);
+  background-attachment:fixed;
+  color:#f3eede;font-family:Georgia,'Cormorant Garamond',serif;font-size:19px;line-height:1.6;
+  min-height:100vh;overflow-x:hidden;
+}
+/* interactive starfield canvas — locked BEHIND everything, cannot cover content */
+canvas.starfield{position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none}
 
-.app{max-width:1000px;margin:0 auto;padding:20px 20px 80px}
+.app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:20px 20px 80px}
 
 header{text-align:center;padding:40px 0 20px}
-.mandala{width:180px;height:180px;color:#ecd28a}
+.mandala{width:180px;height:180px;color:#ecd28a;animation:spin 160s linear infinite}
 .mandala-wrap{display:flex;justify-content:center;margin-bottom:10px}
-header h1{font-size:3rem;color:#ecd28a}
+@keyframes spin{to{transform:rotate(360deg)}}
+header h1{font-size:3rem;color:#ecd28a;line-height:1.1}
 header .sub{color:#b7b0cc;font-style:italic;font-size:1.2rem;margin-top:6px}
 header .sys{display:inline-block;margin-top:14px;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:#ecd28a;border:1px solid var(--line);border-radius:100px;padding:7px 18px}
 
-.langbar{display:flex;justify-content:center;gap:8px;margin-top:20px}
-.langbar button{background:none;border:1px solid var(--line);color:#f3eede;border-radius:100px;padding:8px 20px;cursor:pointer;font-size:1rem}
+.langbar{display:flex;justify-content:center;gap:8px;margin-top:20px;flex-wrap:wrap}
+.langbar button{background:none;border:1px solid var(--line);color:#f3eede;border-radius:100px;padding:8px 20px;cursor:pointer;font-size:1rem;font-family:inherit}
 .langbar button.on{background:#ecd28a;color:#1a0f00}
 
 .card{background:#171432;border:1px solid var(--line);border-radius:14px;padding:26px;margin-bottom:8px}
@@ -26,11 +33,11 @@ header .sys{display:inline-block;margin-top:14px;font-size:.75rem;letter-spacing
 .field{display:flex;flex-direction:column;gap:6px;position:relative}
 .field.full{grid-column:1/-1}
 label{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:#ecd28a}
-input,select{background:#0b0920;border:1px solid var(--line);border-radius:8px;color:#f3eede;padding:12px 14px;font-size:1.05rem;font-family:Georgia,serif}
-.ac{position:absolute;top:100%;left:0;right:0;z-index:20;margin-top:6px;background:#171432;border:1px solid var(--line);border-radius:10px}
+input,select{width:100%;background:#0b0920;border:1px solid var(--line);border-radius:8px;color:#f3eede;padding:12px 14px;font-size:1.05rem;font-family:Georgia,serif}
+.ac{position:absolute;top:100%;left:0;right:0;z-index:20;margin-top:6px;background:#171432;border:1px solid var(--line);border-radius:10px;max-height:280px;overflow-y:auto}
 .ac div{padding:11px 15px;cursor:pointer;color:#f3eede;border-bottom:1px solid var(--line)}
 .ac div:hover{background:rgba(236,210,138,.15)}
-.btn{grid-column:1/-1;margin-top:6px;cursor:pointer;border:none;border-radius:10px;background:#e8630a;color:#1a0d00;font-size:1.05rem;padding:16px;letter-spacing:.05em}
+.btn{grid-column:1/-1;margin-top:6px;cursor:pointer;border:none;border-radius:10px;background:#e8630a;color:#1a0d00;font-size:1.05rem;padding:16px;letter-spacing:.05em;font-family:inherit}
 
 .loading{text-align:center;padding:50px 0;color:#ecd28a;font-style:italic;font-size:1.2rem}
 
@@ -45,9 +52,9 @@ input,select{background:#0b0920;border:1px solid var(--line);border-radius:8px;c
 .summary .v .g{color:#ecd28a}
 
 .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.tabs button{background:none;border:1px solid var(--line);color:#f3eede;border-radius:8px;padding:8px 16px;cursor:pointer}
+.tabs button{background:none;border:1px solid var(--line);color:#f3eede;border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit}
 .tabs button.on{border-color:#ecd28a;color:#ecd28a;background:rgba(236,210,138,.1)}
-.chart-svg{width:100%;max-width:400px;margin:0 auto;display:block}
+.chart-svg{width:100%;max-width:400px;margin:0 auto;display:block;height:auto}
 .chart-svg line,.chart-svg rect{stroke:#ecd28a;stroke-width:1.1;fill:none}
 .chart-svg .sign-num{fill:#ff9d4d;font-size:11px}
 .chart-svg .pl{fill:#f3eede;font-size:13px}
@@ -55,9 +62,10 @@ input,select{background:#0b0920;border:1px solid var(--line);border-radius:8px;c
 .chart-svg .la{fill:#ecd28a;font-size:11px}
 .cap{color:#b7b0cc;font-style:italic;text-align:center;margin-top:12px}
 
+.table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#ecd28a;text-align:left;padding:11px 9px;border-bottom:1px solid var(--line)}
-td{padding:10px 9px;border-bottom:1px solid rgba(236,210,138,.12);color:#f3eede}
+th{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#ecd28a;text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 9px;border-bottom:1px solid rgba(236,210,138,.12);color:#f3eede;white-space:nowrap}
 .pill{display:inline-block;font-size:.75rem;padding:2px 9px;border-radius:100px;border:1px solid var(--line);color:#ecd28a}
 .dg-Exalted,.dg-Own{color:#7be0a0}.dg-Debilitated{color:#ff9d9d}.dg-Enemy{color:#ffbf87}
 .retro-tag{color:#ff9d4d}
@@ -76,7 +84,7 @@ td{padding:10px 9px;border-bottom:1px solid rgba(236,210,138,.12);color:#f3eede}
 .flag .s{font-size:1.1rem;margin-top:6px;color:#f3eede}
 .flag .s.on{color:#ff9d4d}.flag .s.off{color:#7be0a0}
 
-.drow{display:flex;align-items:center;gap:12px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.drow{display:flex;align-items:center;gap:12px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .drow .lord{color:#ecd28a;min-width:90px}
 .drow .span{color:#b7b0cc;font-size:.85rem;font-style:italic}
 .drow .now{margin-left:auto;font-size:.65rem;text-transform:uppercase;color:#ff9d4d}
@@ -94,19 +102,28 @@ footer .om{color:#ecd28a;font-size:1.5rem;display:block;margin-bottom:8px}
 .tl-chapter p{color:#f3eede}
 .purpose-card{background:#171432;border:1px solid var(--line);border-radius:14px;padding:28px}
 .purpose-card p{color:#f3eede;font-size:1.2rem;line-height:1.8}
-.tl-toggle{margin-top:8px;background:none;border:1px solid var(--line);color:#ecd28a;border-radius:100px;padding:5px 15px;cursor:pointer}
+.tl-toggle{margin-top:8px;background:none;border:1px solid var(--line);color:#ecd28a;border-radius:100px;padding:5px 15px;cursor:pointer;font-family:inherit}
 .tl-aspects{margin-top:14px;display:grid;gap:10px;border-left:2px solid var(--line);padding-left:16px}
 .tl-aspect{display:flex;flex-direction:column;gap:2px}
 .tl-aspect-label{color:#ff9d4d;font-size:.8rem}
 .tl-aspect-text{color:#b7b0cc;font-size:.95rem}
 
-@media(max-width:820px){.form-grid,.grid-2,.flags{grid-template-columns:1fr}header h1{font-size:2.3rem}}
-
-/* safe interactive starfield — cannot cover content */
-body{position:relative}
-#starfield-bg{
-  position:fixed; inset:0; z-index:-1; pointer-events:none;
-  background:radial-gradient(1100px 640px at 50% -8%, #2a2168 0%, #0e0a2a 45%, #0b0a1a 78%);
+/* ===== responsive: tablet ===== */
+@media(max-width:820px){
+  .form-grid,.grid-2,.flags{grid-template-columns:1fr}
+  header h1{font-size:2.3rem}
+  .mandala{width:140px;height:140px}
+  .app{padding:16px 16px 60px}
 }
-.mandala{animation:spin 160s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ===== responsive: phone ===== */
+@media(max-width:480px){
+  body{font-size:17px}
+  header h1{font-size:1.9rem}
+  header .sub{font-size:1.05rem}
+  .mandala{width:120px;height:120px}
+  .card{padding:18px}
+  .sec-title h2{font-size:1.5rem}
+  .purpose-card{padding:20px}
+  .purpose-card p{font-size:1.08rem}
+  .langbar button{padding:7px 16px;font-size:.95rem}
+}
