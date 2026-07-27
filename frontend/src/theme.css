@@ -1,4 +1,3 @@
-:root{
   /* interactive background — sits BEHIND content */
 .sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
   background:radial-gradient(1100px 640px at 50% -8%, #2a2168 0%, #0e0a2a 45%, #0b0a1a 78%)}
@@ -6,6 +5,8 @@
 .app{position:relative;z-index:1}
 .mandala{animation:spin 160s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+:root{
+
   --night:#0b0a1a; --panel:#171432; --line:rgba(212,175,55,0.25);
   --gold:#ecd28a; --saffron:#ff9d4d; --ink:#f3eede; --ink-dim:#b7b0cc;
 }
