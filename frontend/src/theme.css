@@ -1,10 +1,4 @@
-  /* interactive background — sits BEHIND content */
-.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
-  background:radial-gradient(1100px 640px at 50% -8%, #2a2168 0%, #0e0a2a 45%, #0b0a1a 78%)}
-.starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
-.app{position:relative;z-index:1}
-.mandala{animation:spin 160s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+
 :root{
 
   --night:#0b0a1a; --panel:#171432; --line:rgba(212,175,55,0.25);
@@ -107,3 +101,12 @@ footer .om{color:#ecd28a;font-size:1.5rem;display:block;margin-bottom:8px}
 .tl-aspect-text{color:#b7b0cc;font-size:.95rem}
 
 @media(max-width:820px){.form-grid,.grid-2,.flags{grid-template-columns:1fr}header h1{font-size:2.3rem}}
+
+/* safe interactive starfield — cannot cover content */
+body{position:relative}
+#starfield-bg{
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(1100px 640px at 50% -8%, #2a2168 0%, #0e0a2a 45%, #0b0a1a 78%);
+}
+.mandala{animation:spin 160s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
