@@ -44,27 +44,63 @@ class ChartRequest(BaseModel):
 def root():
     return {"service":"Pavitra Kundali API","system":"Sidereal / Lahiri (Chitrapaksha)","status":"ok"}
 
+async def _photon(q):
+    """Photon (Komoot) — free, no key, built for autocomplete. Covers worldwide places."""
+    url = "https://photon.komoot.io/api/"
+    params = {"q": q, "limit": 8}
+    async with httpx.AsyncClient(timeout=8) as client:
+        r = await client.get(url, params=params, headers={"User-Agent": "PavitraKundali/2.0"})
+        r.raise_for_status()
+        data = r.json()
+    out = []
+    for f in data.get("features", []):
+        c = f.get("geometry", {}).get("coordinates")
+        p = f.get("properties", {})
+        if not c or len(c) < 2:
+            continue
+        lon, lat = float(c[0]), float(c[1])
+        parts = [p.get("name"), p.get("city") or p.get("county"), p.get("state"), p.get("country")]
+        name = ", ".join([x for x in parts if x])
+        if not name:
+            continue
+        out.append({"lat": lat, "lon": lon, "name": name})
+    return out
+
+async def _nominatim(q):
+    """Fallback geocoder."""
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {"q": q, "format": "json", "limit": 8, "addressdetails": 1}
+    async with httpx.AsyncClient(timeout=8) as client:
+        r = await client.get(url, params=params, headers={"User-Agent": "PavitraKundali/2.0 (birth-chart app)"})
+        r.raise_for_status()
+        rows = r.json()
+    return [{"lat": float(x["lat"]), "lon": float(x["lon"]), "name": x["display_name"]} for x in rows]
+
 @app.get("/api/geocode")
 async def geocode(q: str = Query(..., min_length=2)):
-    """Place autocomplete via OpenStreetMap Nominatim (free, no key). Adds timezone name."""
-    url = "https://nominatim.openstreetmap.org/search"
-    params = {"q": q, "format": "json", "limit": 6, "addressdetails": 1}
-    headers = {"User-Agent": "PavitraKundali/2.0 (birth-chart app)"}
+    """Place autocomplete — Photon first, Nominatim fallback. Adds timezone. Worldwide coverage."""
+    rows = []
     try:
-        async with httpx.AsyncClient(timeout=8) as client:
-            r = await client.get(url, params=params, headers=headers)
-            r.raise_for_status()
-            rows = r.json()
-    except Exception as e:
-        raise HTTPException(502, f"Geocoding unavailable: {e}")
-    out = []
-    for row in rows:
-        lat, lon = float(row["lat"]), float(row["lon"])
+        rows = await _photon(q)
+    except Exception:
+        rows = []
+    if not rows:
         try:
-            tzname = _tz_name(lat, lon)
+            rows = await _nominatim(q)
+        except Exception as e:
+            raise HTTPException(502, f"Geocoding unavailable: {e}")
+    out = []
+    seen = set()
+    for row in rows:
+        key = (round(row["lat"], 3), round(row["lon"], 3))
+        if key in seen:
+            continue
+        seen.add(key)
+        try:
+            tzname = _tz_name(row["lat"], row["lon"])
         except Exception:
             tzname = "UTC"
-        out.append({"name": row["display_name"], "lat": lat, "lon": lon, "tz_name": tzname})
+        out.append({"name": row["name"], "lat": row["lat"], "lon": row["lon"], "tz_name": tzname})
     return {"results": out}
 
 @app.post("/api/chart")
