@@ -106,6 +106,7 @@ def chara_karakas(planets):
     return {"role_of":role_of,"planet_of":planet_of,"atmakaraka":items[0][0]}
 
 def compute_chart(dob,tob,lat,lon_geo,tz):
+    swe.set_sid_mode(swe.SIDM_LAHIRI)   # force Lahiri every call — never fall back to default
     jd=_to_jd(dob,tob,tz)
     planets={}
     for name,pid in PLANETS:
